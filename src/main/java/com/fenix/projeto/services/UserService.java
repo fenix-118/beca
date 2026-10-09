@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fenix.projeto.repositories.UserRepository;
+import com.fenix.projeto.services.exceptions.DatabaseException;
 import com.fenix.projeto.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,6 +33,13 @@ public class UserService {
     }
 
     public void delete(Long id) {
+        try {
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException(e.getMessage());
+        }
         repository.deleteById(id);
     }
 
